@@ -41,15 +41,42 @@ function run(){
 
         // user information save in database from register user
         try{
-            app.post('/users',async(req, res)=>{
+            app.put('/users/:email',async(req, res)=>{
                 const information = req.body ;
-                const user = await usersCollections.insertOne(information);
+                const email = req.params.email ; 
+                const filter = {email : email }
+                const updatedDoc ={
+                    $set:information
+                }
+                const options = {upsert:true};
+                const user = await usersCollections.updateOne(filter,updatedDoc,options);
                 res.send(user)
             })
         }
         catch(e){
             console.log(e.message)
         }
+
+        // add user information from about route
+        app.put('/users/:email', async(req,res)=>{
+            const email = req.params.email ; 
+            const info = req.body ;
+            const query = {email : email}
+            const options = {upsert:true};
+            const updatedDoc = {
+                $set:info
+                
+            }
+            const result =await usersCollections.updateOne(query,updatedDoc,options)
+            res.send(result)
+        })
+
+        // get user information 
+        app.get('/users/:email', async(req, res)=>{
+            const email = req.params.email ;
+            const result = await usersCollections.findOne({email:email})
+            res.send(result)
+        })
 
         //  add post information store database 
         app.post('/postInformation', async(req,res)=>{
@@ -83,6 +110,15 @@ function run(){
          catch(e){
             console.log(e.message)
          }
+        })
+
+        // get post for single user he is login
+        app.get('/usersPost/:email',async(req,res)=>{
+            const email = req.params.email ;
+            const query = {email : email};
+            console.log(email)
+            const result = await addPostCollection.find(query).toArray();
+            res.send(result);
         })
 
 
