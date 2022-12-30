@@ -27,7 +27,8 @@ app.get('/', (req, res)=>{
 // database collections
 const usersCollections = client.db('socialMediaApp').collection('usersInfo')
 const addPostCollection = client.db('socialMediaApp').collection('addPostInfo');
-
+const commentCollection = client.db('socialMediaApp').collection('usersComments')
+const likeCollection = client.db('socialMediaApp').collection('usersLike')
 function run(){
     try{
         client.connect();  
@@ -121,6 +122,49 @@ function run(){
             res.send(result);
         })
 
+
+        // collect user comment
+        app.post('/comment',async(req, res)=>{
+            try{
+                const info = req.body ;
+            const result = await commentCollection.insertOne(info);
+            res.send(result);
+            }
+            catch(e){
+                console.log(e.message)
+            }
+        })
+
+        // get comment by id 
+        app.get('/comment/:id', async(req, res )=>{
+            try{
+                const result =await commentCollection.find({postId:req.params.id}).toArray()
+                res.send(result)
+            }
+            catch(e){
+                console.log(e.message)
+            }
+        })
+
+
+        // post user like db 
+        app.post('/like',async(req,res)=>{
+           try{
+            const id= req.body ;
+            const result = await likeCollection.insertOne(id)
+            res.send(result);
+           }
+           catch(e){
+            console.log(e.message)
+           }
+        })
+
+        // get like for each post 
+        app.get('/like/:id',async(req, res)=>{
+            const id = req.params.id ;
+            const result = await likeCollection.find({postId:id}).toArray()
+            res.send(result);
+        })
 
 run()
 app.listen(port, ()=>{
